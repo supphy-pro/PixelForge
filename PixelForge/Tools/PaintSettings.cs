@@ -22,6 +22,7 @@ namespace PixelForge.Tools
                     { "size", 10 },
                     { "color", "#FF000000" },
                     { "rotation", 0 },
+                    { "hardness", 50 },
                 });
                 AddTool("pen", new Dictionary<string, object>
                 {

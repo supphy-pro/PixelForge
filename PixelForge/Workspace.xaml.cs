@@ -36,6 +36,7 @@ namespace PixelForge
         public Color currentPaintColor; // Текущий цвет кисти
         private int _currentPaintRotation; // Текущий поворот кисти
         private int _currentPaintSize; // Текущий размер кисти
+        private int _currentPaintHardnesse; // Текущая жесткость кисти
         public Workspace(TemplateData data)
         {
             InitializeComponent();
@@ -44,8 +45,10 @@ namespace PixelForge
 
             var modeSettings = paintSettings.GetToolSettings(selectedMode.ToLower());
             currentPaintColor = (Color)ColorConverter.ConvertFromString(modeSettings["color"].ToString());
+            _currentPaintRotation = int.Parse(modeSettings["rotation"].ToString());
             _currentPaintSize = int.Parse(modeSettings["size"].ToString());
-            
+            _currentPaintHardnesse = int.Parse(modeSettings["hardness"].ToString());
+
             _data = data;
             EditorCanvas.Width = _data.Width;
             EditorCanvas.Height = _data.Height;
@@ -213,6 +216,8 @@ namespace PixelForge
                 byte[] pixels = new byte[_bitmap.PixelHeight * stride];
                 _bitmap.CopyPixels(pixels, stride, 0);
 
+                double hardness = _currentPaintHardnesse / 100.0;
+
                 // Рисуем круг
                 for (int y = startY; y <= endY; y++)
                 {
@@ -224,8 +229,15 @@ namespace PixelForge
 
                         if (distance <= radius)
                         {
-                            // Вычисляем прозрачность (градиент)
-                            double alphaFactor = 1.0 - (distance / radius);
+                            // Вычисляем прозрачность
+                            double alphaFactor = 1.0;
+                            if (distance > radius * hardness)
+                            {
+                                // Если пиксель дальше "жёсткой" зоны, делаем градиент
+                                alphaFactor = 1.0 - ((distance - radius * hardness) / (radius * (1.0 - hardness)));
+                                alphaFactor = Math.Max(0, alphaFactor); // Ограничиваем прозрачность
+                            }
+
                             byte brushAlpha = (byte)(currentPaintColor.A * alphaFactor);
 
                             // Если прозрачность равна 0, пропускаем
@@ -312,6 +324,15 @@ namespace PixelForge
             }
         }
 
+        private void BrushHardnessSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            // Обновляем значение жесткости кисти
+            if (BrushHardnessTextBox != null)
+            {
+                BrushHardnessTextBox.Text = ((int)((Slider)sender).Value).ToString();
+            }
+        }
+
         private void BrushSizeTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             if (int.TryParse(BrushSizeTextBox.Text, out _))
@@ -334,6 +355,18 @@ namespace PixelForge
             }
             else
                 BrushSizeTextBox.Text = _currentPaintRotation.ToString();
+        }
+
+        private void BrushHardnessTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (int.TryParse(BrushHardnessTextBox.Text, out _))
+            {
+                _currentPaintHardnesse = int.Parse(BrushHardnessTextBox.Text);
+                BrushHardnessSlider.Value = _currentPaintHardnesse;
+                paintSettings.SetToolParameter(selectedMode, "hardness", int.Parse(BrushHardnessTextBox.Text));
+            }
+            else
+                BrushSizeTextBox.Text = _currentPaintHardnesse.ToString();
         }
 
         private void BrushColorButton_Click(object sender, RoutedEventArgs e)
