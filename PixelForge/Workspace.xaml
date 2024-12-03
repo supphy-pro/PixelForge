@@ -1,0 +1,239 @@
+﻿<Window x:Class="PixelForge.Workspace"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:PixelForge"
+        mc:Ignorable="d"
+        Title="Workspace" Height="550" Width="950" Background="#FF303030" WindowStartupLocation="CenterScreen" Icon="icon.ico" WindowState="Maximized" MinWidth="950" MinHeight="550" IsTabStop="False">
+    <Window.Resources>
+        <Style x:Key="PickColorStyle" TargetType="{x:Type Button}">
+            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Padding" Value="1"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border x:Name="border" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" SnapsToDevicePixels="true">
+                            <ContentPresenter x:Name="contentPresenter" Focusable="False" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsDefaulted" Value="true">
+                                <Setter Property="BorderBrush" TargetName="border" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="true">
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="true">
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="MainScrollViewerStyle" TargetType="{x:Type ScrollViewer}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ScrollViewer}">
+                        <Grid x:Name="Grid" Background="{TemplateBinding Background}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="10"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="10"/>
+                            </Grid.RowDefinitions>
+                            <ScrollContentPresenter x:Name="PART_ScrollContentPresenter"
+                                    CanHorizontallyScroll="False"
+                                    ContentTemplate="{TemplateBinding ContentTemplate}"
+                                    CanVerticallyScroll="False"
+                                    Grid.Column="0"
+                                    Content="{TemplateBinding Content}"
+                                    CanContentScroll="{TemplateBinding CanContentScroll}"
+                                    Margin="{TemplateBinding Padding}"
+                                    Grid.Row="0"/>
+                            <!-- Вертикальный ScrollBar -->
+                            <ScrollBar x:Name="PART_VerticalScrollBar"
+                                       Background="#303030"
+                                       Grid.Column="1"
+                                       Grid.Row="0"
+                                       Maximum="{TemplateBinding ScrollableHeight}"
+                                       Minimum="0"
+                                       Orientation="Vertical"
+                                       Value="{Binding VerticalOffset, Mode=OneWay, RelativeSource={RelativeSource Mode=TemplatedParent}}"
+                                       ViewportSize="{TemplateBinding ViewportHeight}"
+                                       Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}">
+                                <ScrollBar.Template>
+                                    <ControlTemplate TargetType="ScrollBar">
+                                        <Grid Background="#303030">
+                                            <Track x:Name="PART_Track"
+                                                   Value="{TemplateBinding Value}"
+                                                   Maximum="{TemplateBinding Maximum}"
+                                                   Minimum="{TemplateBinding Minimum}"
+                                                   ViewportSize="{TemplateBinding ViewportSize}"
+                                                   Orientation="Vertical">
+                                                <Track.Thumb>
+                                                    <Thumb Background="#606060" />
+                                                </Track.Thumb>
+                                            </Track>
+                                        </Grid>
+                                    </ControlTemplate>
+                                </ScrollBar.Template>
+                            </ScrollBar>
+
+                            <!-- Горизонтальный ScrollBar -->
+                            <ScrollBar x:Name="PART_HorizontalScrollBar"
+                                       Background="#303030"
+                                       Grid.Column="0"
+                                       Grid.Row="1"
+                                       Maximum="{TemplateBinding ScrollableWidth}"
+                                       Minimum="0"
+                                       Orientation="Horizontal"
+                                       Value="{Binding HorizontalOffset, Mode=OneWay, RelativeSource={RelativeSource Mode=TemplatedParent}}"
+                                       ViewportSize="{TemplateBinding ViewportWidth}"
+                                       Visibility="{TemplateBinding ComputedHorizontalScrollBarVisibility}">
+                                <ScrollBar.Template>
+                                    <ControlTemplate TargetType="ScrollBar">
+                                        <Grid Background="#303030">
+                                            <Track x:Name="PART_Track"
+                                                   Value="{TemplateBinding Value}"
+                                                   Maximum="{TemplateBinding Maximum}"
+                                                   Minimum="{TemplateBinding Minimum}"
+                                                   ViewportSize="{TemplateBinding ViewportSize}"
+                                                   Orientation="Horizontal">
+                                                <Track.Thumb>
+                                                    <Thumb Background="#606060"/>
+                                                </Track.Thumb>
+                                            </Track>
+                                        </Grid>
+                                    </ControlTemplate>
+                                </ScrollBar.Template>
+                            </ScrollBar>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsEnabled" Value="false">
+                    <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="EditorCanvasStyle" TargetType="{x:Type Image}">
+            
+        </Style>
+    </Window.Resources>
+    <Grid>
+        <!-- Разделение на области -->
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="20"/>
+            <!-- Левая панель -->
+            <ColumnDefinition Width="*"/>
+            <!-- Центральное рабочее пространство -->
+            <ColumnDefinition Width="5"/>
+            <!-- Разделитель -->
+            <ColumnDefinition Width="350" MaxWidth="450" MinWidth="300"/>
+            <!-- Правая панель -->
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40"/>
+            <!-- Верхняя панель -->
+            <RowDefinition Height="*"/>
+            <!-- Основное пространство -->
+            <RowDefinition Height="25"/>
+            <!-- Нижняя панель -->
+        </Grid.RowDefinitions>
+
+        <!-- Верхняя панель -->
+        <Menu Grid.Row="0" Grid.ColumnSpan="4" Background="#222831" Foreground="#EEEEEE" IsTabStop="True">
+            <MenuItem Header="Файл">
+                <MenuItem Header="Создать"/>
+                <MenuItem Header="Открыть"/>
+                <MenuItem Header="Сохранить"/>
+                <MenuItem Header="Закрыть"/>
+            </MenuItem>
+            <MenuItem Header="Редактировать">
+                <MenuItem Header="Отменить"/>
+                <MenuItem Header="Повторить"/>
+            </MenuItem>
+            <MenuItem Header="Вид"/>
+            <MenuItem Header="Настройки"/>
+            <MenuItem Header="Помощь"/>
+        </Menu>
+
+        <!-- Левая панель инструментов -->
+        <StackPanel Grid.Column="0" Grid.Row="1" Background="#393E46">
+            <Button Content="✂️" ToolTip="Выбрать"/>
+            <Button Content="🖌️" ToolTip="Кисть"/>
+            <Button Content="✏️" ToolTip="Карандаш"/>
+            <Button Content="🔤" ToolTip="Текст"/>
+        </StackPanel>
+
+        <!-- Центральное рабочее пространство -->
+        <Border Grid.Column="1" Grid.Row="1" Background="#303030">
+            <ScrollViewer Style="{DynamicResource MainScrollViewerStyle}" x:Name="MainScrollViewer" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" PreviewMouseWheel="MainCanvasScrolling" >
+                <Grid>
+                    <Image Style="{DynamicResource EditorCanvasStyle}" x:Name="EditorCanvas"
+                           MouseMove="PixelCanvas_MouseMove"
+                           MouseLeftButtonDown="EditorCanvas_MouseLeftButtonDown"
+                           MouseLeftButtonUp="EditorCanvas_MouseLeftButtonUp"
+                           MouseRightButtonDown="OpenCanvasContextMenu"
+                           SnapsToDevicePixels="True"
+                           Margin="300"
+                           RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+                    <Popup x:Name="BrushSettingsPopup" StaysOpen="False" Placement="MousePoint" AllowsTransparency="True" PopupAnimation="Fade" >
+                        <Border Background="#404040" BorderBrush="#202020" BorderThickness="1" CornerRadius="5" Padding="10">
+                            <StackPanel>
+                                <TextBlock Text="Brush Settings" Foreground="White" FontWeight="Bold" Margin="0,0,0,10" />
+                                <!-- Размер кисти -->
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                    <TextBlock Text="Size:" Foreground="White" VerticalAlignment="Center" Margin="0,0,5,0" />
+                                    <Slider x:Name="BrushSizeSlider" Width="100" Minimum="1" Maximum="100" Value="20" ValueChanged="BrushSizeSlider_ValueChanged" />
+                                    <TextBox x:Name="BrushSizeTextBox" Width="50" Margin="5,0,0,0" TextAlignment="Center" TextChanged="BrushSizeTextBox_TextChanged"/>
+                                    <TextBlock Text="px" Foreground="White" VerticalAlignment="Center" Margin="5,0,0,0" />
+                                </StackPanel>
+                                <!-- Поворот кисти -->
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="Rotation:" Foreground="White" VerticalAlignment="Center" Margin="0,0,5,0" />
+                                    <Slider x:Name="BrushRotationSlider" Width="100" Minimum="0" Maximum="360" Value="0" ValueChanged="BrushRotationSlider_ValueChanged" />
+                                    <TextBox x:Name="BrushRotationTextBox" Width="50" Margin="5,0,0,0" TextAlignment="Center" TextChanged="BrushRotationTextBox_TextChanged"/>
+                                    <TextBlock Text="°" Foreground="White" VerticalAlignment="Center" Margin="5,0,0,0" />
+                                </StackPanel>
+                                <!-- Цвет кисти -->
+                                <Button Style="{DynamicResource PickColorStyle}" x:Name="BrushColorButton" Click="BrushColorButton_Click" Height="15" Margin="0 10 0 0" Cursor="Hand"/>
+                            </StackPanel>
+                        </Border>
+                    </Popup>
+                </Grid>
+            </ScrollViewer>
+        </Border>
+
+        <!-- Разделитель для изменения ширины правой панели -->
+        <GridSplitter Grid.Row="1" Grid.Column="2" Width="5" Background="#707070" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+
+        <!-- Правая панель свойств -->
+        <StackPanel Grid.Column="3" Grid.Row="1" Background="#393E46">
+            <TextBlock Text="Свойства инструмента" FontSize="16" Foreground="#EEEEEE" Margin="0 0 0 10"/>
+            <StackPanel Margin="0 10 0 0">
+                <TextBlock Text="Цвет" Foreground="#EEEEEE"/>
+                <Button Background="Red" Height="25" Width="50"/>
+            </StackPanel>
+            <StackPanel Margin="0 10 0 0">
+                <TextBlock Text="Толщина" Foreground="#EEEEEE"/>
+                <Slider Minimum="1" Maximum="20" Value="5" Width="200"/>
+            </StackPanel>
+        </StackPanel>
+
+        <!-- Нижняя панель статуса -->
+        <StatusBar Grid.Row="2" Grid.ColumnSpan="4" Background="#222831" Foreground="#EEEEEE">
+            <StatusBarItem>
+                <TextBlock x:Name="sizeText" Text="Размер: 1920x1080"/>
+            </StatusBarItem>
+            <StatusBarItem>
+                <TextBlock x:Name="scaleText" Text="Масштаб: 100%"/>
+            </StatusBarItem>
+        </StatusBar>
+    </Grid>
+</Window>

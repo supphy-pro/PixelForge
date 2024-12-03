@@ -1,0 +1,50 @@
+﻿<Window x:Class="PixelForge.ColorPicker"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:PixelForge"
+        mc:Ignorable="d"
+        Title="ColorPicker" Height="400" Width="400" Background="#FF303030" WindowStartupLocation="CenterScreen" Icon="/icon.ico" ResizeMode="NoResize">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="5*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="7*"/>
+            <RowDefinition Height="1*"/>
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Column="0" VerticalAlignment="Center">
+            <TextBlock Text="Hue" HorizontalAlignment="Center" Foreground="#EEEEEE"/>
+            <Slider x:Name="HueSlider" Minimum="0" Maximum="360"
+                    ValueChanged="HueSlider_ValueChanged" Orientation="Vertical"
+                    Width="20" Height="210"/>
+        </StackPanel>
+        <Canvas x:Name="ColorCanvas" 
+                MouseLeftButtonDown="ColorCanvas_MouseLeftButtonDown"
+                MouseMove="ColorCanvas_MouseMove" Grid.Column="1"
+                Height="300"
+                Width="300">
+            <Canvas.Background>
+                <ImageBrush x:Name="GradientBrush"/>
+            </Canvas.Background>
+            <Ellipse x:Name="SelectionIndicator" Width="10" Height="10" Stroke="White" StrokeThickness="1"/>
+        </Canvas>
+        <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+            <TextBlock Text="#" Foreground="#EEEEEE" VerticalAlignment="Center" Margin="5"/>
+            <TextBox x:Name="HexInput" Text="FFFFFF" Width="100" VerticalAlignment="Center" Margin="0 0 10 0" TextChanged="HexInput_TextChanged"/>
+            <Button Content="Cancel"
+                VerticalAlignment="Center"
+                Width="70" Height="30"
+                Margin="0 0 10 0"
+                Click="CancelPickerClick"/>
+            <Button Content="OK"
+                VerticalAlignment="Center"
+                Width="50" Height="30"
+                Margin="0 0 10 0"
+                Click="SelectButton_Click"/>
+        </StackPanel>
+        <Rectangle x:Name="exampleColor" Grid.Column="0" Grid.Row="1" Fill="#FFFFFF" Stroke="White"></Rectangle>
+    </Grid>
+</Window>
