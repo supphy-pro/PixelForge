@@ -201,6 +201,13 @@
                                     <TextBox x:Name="BrushRotationTextBox" Width="50" Margin="5,0,0,0" TextAlignment="Center" TextChanged="BrushRotationTextBox_TextChanged"/>
                                     <TextBlock Text="°" Foreground="White" VerticalAlignment="Center" Margin="5,0,0,0" />
                                 </StackPanel>
+                                <!-- Жёсткость кисти -->
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="Hardness:" Foreground="White" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                    <Slider x:Name="BrushHardnessSlider" Width="100" Minimum="0" Maximum="100" Value="100" ValueChanged="BrushHardnessSlider_ValueChanged"/>
+                                    <TextBox x:Name="BrushHardnessTextBox" Width="50" Margin="5,0,0,0" TextAlignment="Center" TextChanged="BrushHardnessTextBox_TextChanged"/>
+                                    <TextBlock Text="%" Foreground="White" VerticalAlignment="Center" Margin="5,0,0,0" />
+                                </StackPanel>
                                 <!-- Цвет кисти -->
                                 <Button Style="{DynamicResource PickColorStyle}" x:Name="BrushColorButton" Click="BrushColorButton_Click" Height="15" Margin="0 10 0 0" Cursor="Hand"/>
                             </StackPanel>
