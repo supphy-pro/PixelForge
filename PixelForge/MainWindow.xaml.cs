@@ -5,6 +5,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using PixelForge.Tools;
 namespace PixelForge
 {
     public partial class MainWindow : Window
@@ -13,6 +14,7 @@ namespace PixelForge
         {
             InitializeComponent();
             UpdatesTemplates();
+            new PaintSettings();
         }
 
         public void UpdatesTemplates()

@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -11,16 +13,19 @@ namespace PixelForge
 {
     public partial class Workspace : Window
     {
+        private bool isInitializing = true;
         private readonly Dictionary<int, string> _modes = new Dictionary<int, string>()
         {
-            { 0, "SELECT"},
-            { 1, "BRUSH"},
-            { 2, "PEN"},
-            { 3, ""},
-            { 4, ""},
-            { 5, ""},
-            { 6, ""},
-            { 7, ""},
+            { 0, "transform"},
+            { 1, "select"},
+            { 2, "brush"},
+            { 3, "pen"},
+            { 4, "eraser"},
+            { 5, "fill"},
+            { 6, "pipette"},
+            { 7, "stamp"},
+            { 8, "text"},
+            { 9, "reactangl"},
         };
 
         private double _currentScale = 1.0;
@@ -31,23 +36,21 @@ namespace PixelForge
 
         public string selectedMode;
 
+        private readonly Dictionary<string, Border> tagToBorderMap = new Dictionary<string, Border>();
         private Point _lastPaintedPixel = new Point(-1, -1);
         public PaintSettings paintSettings = new PaintSettings();
         public Color currentPaintColor; // Текущий цвет кисти
         private int _currentPaintRotation; // Текущий поворот кисти
         private int _currentPaintSize; // Текущий размер кисти
         private int _currentPaintHardnesse; // Текущая жесткость кисти
+        private int _currentPaintOpacity; // Текущая прозрачность кисти
         public Workspace(TemplateData data)
         {
             InitializeComponent();
+            selectedMode = _modes[3];
+            GetAllToolButtons();
 
-            selectedMode = _modes[1];
-
-            var modeSettings = paintSettings.GetToolSettings(selectedMode.ToLower());
-            currentPaintColor = (Color)ColorConverter.ConvertFromString(modeSettings["color"].ToString());
-            _currentPaintRotation = int.Parse(modeSettings["rotation"].ToString());
-            _currentPaintSize = int.Parse(modeSettings["size"].ToString());
-            _currentPaintHardnesse = int.Parse(modeSettings["hardness"].ToString());
+            UpdateToolSettings();
 
             _data = data;
             EditorCanvas.Width = _data.Width;
@@ -58,9 +61,54 @@ namespace PixelForge
 
             BrushRotationTextBox.Text = _currentPaintRotation.ToString();
             BrushSizeTextBox.Text = _currentPaintSize.ToString();
+            BrushHardnessTextBox.Text = _currentPaintHardnesse.ToString();
+            BrushOpacityTextBox.Text = _currentPaintOpacity.ToString();
             BrushRotationSlider.Value = _currentPaintRotation;
             BrushSizeSlider.Value = _currentPaintSize;
+            BrushHardnessSlider.Value = _currentPaintHardnesse;
+            BrushOpacitySlider.Value = _currentPaintOpacity;
             BrushColorButton.Background = new SolidColorBrush(currentPaintColor);
+        }
+
+        private void GetAllToolButtons()
+        {
+            foreach (Grid childGrid in Tools.Children)
+            {
+                foreach (var childBorder in childGrid.Children)
+                {
+                    if (childBorder is Border border && border.Tag != null)
+                    {
+                        tagToBorderMap[border.Tag.ToString()] = border;
+                        border.Background = null;
+                        border.BorderBrush = null;
+                        border.MouseLeftButtonUp += ChooseToolClick;
+                        ((border.Parent as Grid).Children[0] as Border).Background = null;
+                    }
+                }
+            }
+
+            tagToBorderMap[selectedMode].Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF4A5975"));
+            tagToBorderMap[selectedMode].CornerRadius = new CornerRadius(0, 3, 3, 0);
+            tagToBorderMap[selectedMode].BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF4363A0"));
+            ((tagToBorderMap[selectedMode].Parent as Grid).Children[0] as Border).Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF4363A0"));
+        }
+        private void UpdateToolSettings()
+        {
+            if (selectedMode == "brush")
+            {
+                var modeSettings = paintSettings.GetToolSettings(selectedMode);
+                currentPaintColor = (Color)ColorConverter.ConvertFromString(modeSettings["color"].ToString());
+                _currentPaintRotation = Convert.ToInt32(modeSettings["rotation"]);
+                _currentPaintSize = Convert.ToInt32(modeSettings["size"]);
+                _currentPaintHardnesse = Convert.ToInt32(modeSettings["hardness"]);
+                _currentPaintOpacity = Convert.ToInt32(modeSettings["opacity"]);
+            }
+            else if (selectedMode == "pen")
+            {
+                var modeSettings = paintSettings.GetToolSettings(selectedMode);
+                currentPaintColor = (Color)ColorConverter.ConvertFromString(modeSettings["color"].ToString());
+                _currentPaintSize = Convert.ToInt32(modeSettings["size"]);
+            }
         }
 
         // Создание сетки пикселей
@@ -116,6 +164,8 @@ namespace PixelForge
         }
         private void MainCanvasScrolling(object sender, MouseWheelEventArgs e)
         {
+            if (_isDrawing)
+                return;
             if (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl))
             {
                 e.Handled = true;
@@ -192,7 +242,7 @@ namespace PixelForge
         // Рисование пикселя
         private void PaintPixel(Point position)
         {
-            if (selectedMode == "BRUSH")
+            if (selectedMode == "brush")
             {
                 int radius = _currentPaintSize / 2; // Радиус кисти
 
@@ -217,6 +267,7 @@ namespace PixelForge
                 _bitmap.CopyPixels(pixels, stride, 0);
 
                 double hardness = _currentPaintHardnesse / 100.0;
+                double brushOpacity = _currentPaintOpacity / 100.0;
 
                 // Рисуем круг
                 for (int y = startY; y <= endY; y++)
@@ -237,6 +288,8 @@ namespace PixelForge
                                 alphaFactor = 1.0 - ((distance - radius * hardness) / (radius * (1.0 - hardness)));
                                 alphaFactor = Math.Max(0, alphaFactor); // Ограничиваем прозрачность
                             }
+
+                            alphaFactor *= brushOpacity;
 
                             byte brushAlpha = (byte)(currentPaintColor.A * alphaFactor);
 
@@ -270,7 +323,7 @@ namespace PixelForge
                 _bitmap.WritePixels(new Int32Rect(0, 0, _bitmap.PixelWidth, _bitmap.PixelHeight), pixels, stride, 0);
                 _lastPaintedPixel = new Point(centerX, centerY);
             }
-            else if (selectedMode == "PEN")
+            else if (selectedMode == "pen")
             {
                 int x = (int)position.X - _currentPaintSize / 2;
                 int y = (int)position.Y - _currentPaintSize / 2;
@@ -333,9 +386,18 @@ namespace PixelForge
             }
         }
 
+        private void BrushOpacitySlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            // Обновляем значение прозрачности кисти
+            if (BrushOpacityTextBox != null)
+            {
+                BrushOpacityTextBox.Text = ((int)((Slider)sender).Value).ToString();
+            }
+        }
+
         private void BrushSizeTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (int.TryParse(BrushSizeTextBox.Text, out _))
+            if (!isInitializing && int.TryParse(BrushSizeTextBox.Text, out _))
             {
                 _currentPaintSize = int.Parse(BrushSizeTextBox.Text);
                 BrushSizeSlider.Value = _currentPaintSize;
@@ -347,7 +409,7 @@ namespace PixelForge
 
         private void BrushRotationTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (int.TryParse(BrushRotationTextBox.Text, out _))
+            if (!isInitializing && int.TryParse(BrushRotationTextBox.Text, out _))
             {
                 _currentPaintRotation = int.Parse(BrushRotationTextBox.Text);
                 BrushRotationSlider.Value = _currentPaintRotation;
@@ -359,7 +421,7 @@ namespace PixelForge
 
         private void BrushHardnessTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (int.TryParse(BrushHardnessTextBox.Text, out _))
+            if (!isInitializing && int.TryParse(BrushHardnessTextBox.Text, out _))
             {
                 _currentPaintHardnesse = int.Parse(BrushHardnessTextBox.Text);
                 BrushHardnessSlider.Value = _currentPaintHardnesse;
@@ -369,10 +431,51 @@ namespace PixelForge
                 BrushSizeTextBox.Text = _currentPaintHardnesse.ToString();
         }
 
+        private void BrushOpacityTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (!isInitializing && int.TryParse(BrushOpacityTextBox.Text, out _))
+            {
+                if (int.Parse(BrushOpacityTextBox.Text) >= 1 && int.Parse(BrushOpacityTextBox.Text) <= 100)
+                {
+                    _currentPaintOpacity = int.Parse(BrushOpacityTextBox.Text);
+                    BrushOpacitySlider.Value = _currentPaintOpacity;
+                    paintSettings.SetToolParameter(selectedMode, "opacity", int.Parse(BrushOpacityTextBox.Text));
+                }
+                else
+                {
+                    BrushOpacityTextBox.Text = _currentPaintOpacity.ToString();
+                    BrushOpacitySlider.Value = _currentPaintOpacity;
+                }
+            }
+            else
+                BrushOpacityTextBox.Text = _currentPaintOpacity.ToString();
+        }
+
         private void BrushColorButton_Click(object sender, RoutedEventArgs e)
         {
             ColorPicker picker = new ColorPicker(null, this);
             picker.ShowDialog();
+        }
+
+        private void ChooseToolClick(object sender, MouseButtonEventArgs e)
+        {
+            Border selectedTool = sender as Border;
+            selectedTool.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF4A5975"));
+            selectedTool.CornerRadius = new CornerRadius(0, 3, 3, 0);
+            selectedTool.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF4363A0"));
+            ((selectedTool.Parent as Grid).Children[0] as Border).Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF4363A0"));
+            if (tagToBorderMap.TryGetValue(selectedMode, out var previousTool))
+            {
+                previousTool.Background = null;
+                previousTool.BorderBrush = null;
+                ((previousTool.Parent as Grid).Children[0] as Border).Background = null;
+            }
+            selectedMode = selectedTool.Tag.ToString();
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            isInitializing = false;
         }
     }
 }
