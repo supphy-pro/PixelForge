@@ -125,5 +125,20 @@
   <ItemGroup>
     <Resource Include="icon.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\cursor.png" />
+    <Resource Include="Images\eraser.png" />
+    <Resource Include="Images\fill.png" />
+    <Resource Include="Images\line.png" />
+    <Resource Include="Images\oval.png" />
+    <Resource Include="Images\paint.png" />
+    <Resource Include="Images\pencil.png" />
+    <Resource Include="Images\pipette.png" />
+    <Resource Include="Images\rectangl.png" />
+    <Resource Include="Images\resize.png" />
+    <Resource Include="Images\select.png" />
+    <Resource Include="Images\stamp.png" />
+    <Resource Include="Images\text.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

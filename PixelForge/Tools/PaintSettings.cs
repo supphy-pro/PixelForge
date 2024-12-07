@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Windows.Media;
 using Newtonsoft.Json;
 
 namespace PixelForge.Tools
@@ -17,18 +18,27 @@ namespace PixelForge.Tools
             else
             {
                 _tools = new Dictionary<string, Dictionary<string, object>>();
+                AddTool("transform", null);
+                AddTool("select", null);
                 AddTool("brush", new Dictionary<string, object>
                 {
                     { "size", 10 },
                     { "color", "#FF000000" },
                     { "rotation", 0 },
                     { "hardness", 50 },
+                    { "opacity", 100 },
                 });
                 AddTool("pen", new Dictionary<string, object>
                 {
                     { "size", 10 },
                     { "color", "#FF000000" },
                 });
+                AddTool("eraser", null);
+                AddTool("fill", null);
+                AddTool("pipette", null);
+                AddTool("stamp", null);
+                AddTool("text", null);
+                AddTool("reactangl", null);
             }
         }
 
@@ -83,10 +93,9 @@ namespace PixelForge.Tools
         // Изменить параметр инструмента
         public void SetToolParameter(string toolName, string parameterName, object value)
         {
-            toolName = toolName.ToLower();
             if (_tools.ContainsKey(toolName))
             {
-                if (_tools[toolName].ContainsKey(parameterName))
+                if (_tools[toolName] != null && _tools[toolName].ContainsKey(parameterName))
                 {
                     _tools[toolName][parameterName] = value;
                     SaveSettings();

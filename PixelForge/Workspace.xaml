@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PixelForge"
         mc:Ignorable="d"
-        Title="Workspace" Height="550" Width="950" Background="#FF303030" WindowStartupLocation="CenterScreen" Icon="icon.ico" WindowState="Maximized" MinWidth="950" MinHeight="550" IsTabStop="False">
+        Title="Workspace" Height="550" Width="950" Background="#FF303030" WindowStartupLocation="CenterScreen" Icon="icon.ico" WindowState="Maximized" MinWidth="950" MinHeight="550" IsTabStop="False" Loaded="Window_Loaded">
     <Window.Resources>
         <Style x:Key="PickColorStyle" TargetType="{x:Type Button}">
             <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
@@ -122,13 +122,13 @@
             </Style.Triggers>
         </Style>
         <Style x:Key="EditorCanvasStyle" TargetType="{x:Type Image}">
-            
+
         </Style>
     </Window.Resources>
     <Grid>
         <!-- Разделение на области -->
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="20"/>
+            <ColumnDefinition Width="40"/>
             <!-- Левая панель -->
             <ColumnDefinition Width="*"/>
             <!-- Центральное рабочее пространство -->
@@ -164,11 +164,76 @@
         </Menu>
 
         <!-- Левая панель инструментов -->
-        <StackPanel Grid.Column="0" Grid.Row="1" Background="#393E46">
-            <Button Content="✂️" ToolTip="Выбрать"/>
-            <Button Content="🖌️" ToolTip="Кисть"/>
-            <Button Content="✏️" ToolTip="Карандаш"/>
-            <Button Content="🔤" ToolTip="Текст"/>
+        <StackPanel x:Name="Tools" Grid.Column="0" Grid.Row="1" Background="#393E46">
+            <Grid Margin="0 5 0 0" Width="40" Height="30" ToolTip="Transform">
+                <Border Width="5" Height="30" HorizontalAlignment="Left"/>
+                <Border Width="30" Height="30" Tag="transform" CornerRadius="3" BorderThickness="1">
+                    <Image Source="Images/cursor.png" Width="20"/>
+                </Border>
+            </Grid>
+
+            <Grid Width="40" Margin="0 5 0 0" Height="30" ToolTip="Select">
+                <Border Width="5" Height="30" HorizontalAlignment="Left"/>
+                <Border Width="30" Height="30" Tag="select" CornerRadius="3" BorderThickness="1">
+                    <Image Source="Images/select.png" Width="20"/>
+                </Border>
+            </Grid>
+
+            <Grid Width="40" Margin="0 5 0 0" Height="30" ToolTip="Brush">
+                <Border Width="5" Height="30" HorizontalAlignment="Left"/>
+                <Border Width="30" Height="30" Tag="brush" CornerRadius="3" BorderThickness="1">
+                    <Image Source="Images/paint.png" Width="20"/>
+                </Border>
+            </Grid>
+
+            <Grid Width="40" Margin="0 5 0 0" Height="30" ToolTip="Pen">
+                <Border Width="5" Height="30" HorizontalAlignment="Left"/>
+                <Border Width="30" Height="30" Tag="pen" CornerRadius="3" BorderThickness="1">
+                    <Image Source="Images/pencil.png" Width="20"/>
+                </Border>
+            </Grid>
+
+            <Grid Width="40" Margin="0 5 0 0" Height="30" ToolTip="Eraser">
+                <Border Width="5" Height="30" HorizontalAlignment="Left"/>
+                <Border Width="30" Height="30" Tag="eraser" CornerRadius="3" BorderThickness="1">
+                    <Image Source="Images/eraser.png" Width="20"/>
+                </Border>
+            </Grid>
+
+            <Grid Width="40" Margin="0 5 0 0" Height="30" ToolTip="Fill">
+                <Border Width="5" Height="30" HorizontalAlignment="Left"/>
+                <Border Width="30" Height="30" Tag="fill" CornerRadius="3" BorderThickness="1">
+                    <Image Source="Images/fill.png" Width="20"/>
+                </Border>
+            </Grid>
+
+            <Grid Width="40" Margin="0 5 0 0" Height="30" ToolTip="Pipette">
+                <Border Width="5" Height="30" HorizontalAlignment="Left"/>
+                <Border Width="30" Height="30" Tag="pipette" CornerRadius="3" BorderThickness="1">
+                    <Image Source="Images/pipette.png" Width="20"/>
+                </Border>
+            </Grid>
+
+            <Grid Width="40" Margin="0 5 0 0" Height="30" ToolTip="Stamp">
+                <Border Width="5" Height="30" HorizontalAlignment="Left"/>
+                <Border Width="30" Height="30" Tag="stamp" CornerRadius="3" BorderThickness="1">
+                    <Image Source="Images/stamp.png" Width="20"/>
+                </Border>
+            </Grid>
+
+            <Grid Width="40" Margin="0 5 0 0" Height="30" ToolTip="Text">
+                <Border Width="5" Height="30" HorizontalAlignment="Left"/>
+                <Border Width="30" Height="30" Tag="text" CornerRadius="3" BorderThickness="1">
+                    <Image Source="Images/text.png" Width="20"/>
+                </Border>
+            </Grid>
+            
+            <Grid Width="40" Margin="0 5 0 0" Height="30" ToolTip="Shape rectangl">
+                <Border Width="5" Height="30" HorizontalAlignment="Left"/>
+                <Border Width="30" Height="30" Tag="rectangl" CornerRadius="3" BorderThickness="1">
+                    <Image Source="Images/rectangl.png" Width="20"/>
+                </Border>
+            </Grid>
         </StackPanel>
 
         <!-- Центральное рабочее пространство -->
@@ -195,21 +260,28 @@
                                     <TextBlock Text="px" Foreground="White" VerticalAlignment="Center" Margin="5,0,0,0" />
                                 </StackPanel>
                                 <!-- Поворот кисти -->
-                                <StackPanel Orientation="Horizontal">
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
                                     <TextBlock Text="Rotation:" Foreground="White" VerticalAlignment="Center" Margin="0,0,5,0" />
                                     <Slider x:Name="BrushRotationSlider" Width="100" Minimum="0" Maximum="360" Value="0" ValueChanged="BrushRotationSlider_ValueChanged" />
                                     <TextBox x:Name="BrushRotationTextBox" Width="50" Margin="5,0,0,0" TextAlignment="Center" TextChanged="BrushRotationTextBox_TextChanged"/>
                                     <TextBlock Text="°" Foreground="White" VerticalAlignment="Center" Margin="5,0,0,0" />
                                 </StackPanel>
                                 <!-- Жёсткость кисти -->
-                                <StackPanel Orientation="Horizontal">
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
                                     <TextBlock Text="Hardness:" Foreground="White" VerticalAlignment="Center" Margin="0,0,5,0"/>
                                     <Slider x:Name="BrushHardnessSlider" Width="100" Minimum="0" Maximum="100" Value="100" ValueChanged="BrushHardnessSlider_ValueChanged"/>
                                     <TextBox x:Name="BrushHardnessTextBox" Width="50" Margin="5,0,0,0" TextAlignment="Center" TextChanged="BrushHardnessTextBox_TextChanged"/>
                                     <TextBlock Text="%" Foreground="White" VerticalAlignment="Center" Margin="5,0,0,0" />
                                 </StackPanel>
+                                <!-- Прозрачность кисти -->
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                    <TextBlock Text="Opacity:" Foreground="White" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                    <Slider x:Name="BrushOpacitySlider" Width="100" Minimum="1" Maximum="100" Value="100" ValueChanged="BrushOpacitySlider_ValueChanged"/>
+                                    <TextBox x:Name="BrushOpacityTextBox" Width="50" Margin="5,0,0,0" TextAlignment="Center" TextChanged="BrushOpacityTextBox_TextChanged"/>
+                                    <TextBlock Text="%" Foreground="White" VerticalAlignment="Center" Margin="5,0,0,0" />
+                                </StackPanel>
                                 <!-- Цвет кисти -->
-                                <Button Style="{DynamicResource PickColorStyle}" x:Name="BrushColorButton" Click="BrushColorButton_Click" Height="15" Margin="0 10 0 0" Cursor="Hand"/>
+                                <Button Style="{DynamicResource PickColorStyle}" x:Name="BrushColorButton" Click="BrushColorButton_Click" Height="15" Cursor="Hand"/>
                             </StackPanel>
                         </Border>
                     </Popup>
